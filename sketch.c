@@ -103,14 +103,22 @@ void loop ()
     {
       case PLAY :
             if (hasChanged)
+            {
                //reset current beat to 0
                currentbeat = 0;
-             checkBeat();
-             for (int i,i<number_of_track,i++)             
+               nextbeat = millis() + getTempo();
+            }
+            checkBeat();
+            for (int i,i<number_of_track,i++)             
                  checkSolenoid(i); 
              break;
       case PAUSE :
-             k2000()
+             k2000();
+             break;
+      case SETUP :
+             setup();
+             break;
+    }
 }
 
 
@@ -166,7 +174,7 @@ int checkState()
                   status = SETUP;
                   return True;      			
     			    case PLAY:
-      				    //record the state of switch here 
+      				    //record the state of switch here to add 8 beats
       				    break;
                case SETUP:
                   //save config here and return in pause mode                    
