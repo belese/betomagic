@@ -59,7 +59,7 @@ boolean state[number_of_track];
 #define PLAY = 2
 #define SETUP = 3
 #define USB = 4
-int status;
+int status = PAUSE;
 
 
 //buuton on/off info
@@ -69,29 +69,30 @@ boolean isPressed = false;
 long nextbeat = 0;
 int currentbeat = 0;
 int totalbeat = number_of_beat;
+boolean recordbeat[64][4]
+int currentrecordbeat = 0
 
 //solenoid info
 boolean solstatus[number_of_track];
 
 
-
 void setup() 
-{
-  Serial.begin(9600);
-  Serial.println("reset");
-
+{  
   pinMode(dataPin,OUTPUT);
   pinMode(latchPin,OUTPUT);
   pinMode(clockPin,OUTPUT);
 
-  for (int i;i<number_of_track;i++){
+  for (int i;i<number_of_track;i++)
+  {
       pinMode(tracks[i],INPUT);
-  }
-
-  for (int i;i<number_of_track;i++){
       pinMode(solenoid[i],OUTPUT);
       digitalWrite(solenoid[i],LOW);
+      solstatus[i] = false;
   }
+
+  Serial.begin(9600);
+  Serial.println("reset");
+
 }
 
 void loop ()
@@ -227,7 +228,7 @@ void checkSolenoid(int id)
   if (solstatus[id] == false)
   {
       if (nextbeat - preTime[id] >= millis())
-      {
+      {                      
            if (checkSwitch(id,currentbeat+1))
            {
                 //we have to run this solenoid
