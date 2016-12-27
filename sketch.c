@@ -72,7 +72,7 @@ int currentbeat = 0;
 int totalbeat = number_of_beat;
 
 //solenoid info
-
+boolean solstatus[number_of_track];
 
 
 
@@ -217,9 +217,30 @@ void checkBeat()
 }
 
 
-void checkSolenoid(int id){
+void checkSolenoid(int id)
+{
   //verifie si le solenoid doit etre activé ou stopper
-  
+  if (solstatus[id] == false)
+  {
+      if (nextbeat - preTime[id] >= millis())
+      {
+           if (checkSwitch(id))
+           {
+                //we have to run this solenoid
+                solstatus[id] = true;
+                digitalWrite(solenoid[id],HIGH);
+           }
+      }
+  }
+  else
+  {
+      if (nextbeat - preTime[id] + delayOn[id] >= millis())
+      {
+           //we have to stop this solenoid
+           solstatus[id] = false;
+           digitalWrite(solenoid[id],LOW);           
+      }
+  }  
 }
 
 
