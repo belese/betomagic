@@ -44,12 +44,11 @@ int startPin = 5
 int tempoPin = A0
 //**********************************//
 
+
 //********Define constant solenoid value here*****//
 //time a solenoid must be on in ms
 int delayOn[] = {80,80,80,80}
 int preTime[] = {0,0,0,0}
-
-
 //************************************************//
 
 //nombre de piste
@@ -76,7 +75,8 @@ boolean solstatus[number_of_track];
 
 
 
-void setup() {
+void setup() 
+{
   Serial.begin(9600);
   Serial.println("reset");
 
@@ -133,13 +133,13 @@ int checkState()
      {
        status = USB;
        return true;
-     }
-       
+     }       
    }
    else
    {
      if (status == USB)
      {
+       //usb cable is unplugged
        status = PAUSE
        return true
      }
@@ -245,7 +245,8 @@ void checkSolenoid(int id)
 }
 
 //Utils
-void setShiftRegister(int value){
+void setShiftRegister(int value)
+{
     //mettre le latch pin  a low pour pouvoir envoyer des valeurs en sÃ©rie au shift register
     digitalWrite(latchPin, LOW);
     //Activer la colonne correspondant aux temp actuel
@@ -270,7 +271,8 @@ void setBeatLed()
 }
 
 
-int getTempo (){
+int getTempo ()
+{
   //PotentiomÃ¨tre>tempo
   //return duration in ms of a beat
   if (status == SETUP)
@@ -283,7 +285,7 @@ int getTempo (){
   return tempo;
 }
   
-  void k2000()
-  {
+ void k2000()
+ {
     //faire clignotter les leds a la k2000 juste pour le fun
-  }
+ }
