@@ -35,24 +35,24 @@ int clockPin = 7;
 int tracks=[] = {10,11,12,13};
 
 //solenoid output pin, must have the same lenght than tracks array
-int solenoid[] = {1,2,3,4}
+int solenoid[] = {1,2,3,4};
 
 //start/stop Button
-int startPin = 5
+int startPin = 5;
 
 //tempo potentionmetre
-int tempoPin = A0
+int tempoPin = A0;
 //**********************************//
 
 
 //********Define constant solenoid value here*****//
 //time a solenoid must be on in ms
-int delayOn[] = {80,80,80,80}
-int preTime[] = {0,0,0,0}
+int delayOn[] = {80,80,80,80};
+int preTime[] = {0,0,0,0};
 //************************************************//
 
 //nombre de piste
-int number_of_track = sizeof(tracks)/sizeof(int)
+int number_of_track = sizeof(tracks)/sizeof(int);
 boolean state[number_of_track];
 
 #define PAUSE = 1
@@ -63,7 +63,7 @@ int status;
 
 
 //buuton on/off info
-boolean isPressed = false
+boolean isPressed = false;
   
 //beat info
 long nextbeat = 0;
@@ -115,6 +115,9 @@ void loop ()
              break;
       case SETUP :
              setup();
+             break;
+      case USB :
+             usb();
              break;
     }
 }
@@ -244,6 +247,16 @@ void checkSolenoid(int id)
   }  
 }
 
+void setup()
+{
+  //TODO
+}
+
+void usb()
+{
+  //TODO
+}
+
 //Utils
 void setShiftRegister(int value)
 {
@@ -257,7 +270,7 @@ void setShiftRegister(int value)
 
 boolean checkSwitch(int raw,int col)
 {
-  //check the state of switch for next beat
+  //check the state of switch in raw,col.
   setShiftRegister((1<<col));
   int state = digitalRead(tracks[raw]);
   if (status == PLAY)
@@ -288,4 +301,5 @@ int getTempo ()
  void k2000()
  {
     //faire clignotter les leds a la k2000 juste pour le fun
+   //TODO
  }
