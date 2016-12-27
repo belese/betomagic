@@ -96,26 +96,18 @@ void setup() {
   }
 }
 
-void loop (){
-    for(int i=0;i<number_of_beat;i++){
-        if digitalRead(startPin)
-            delay(20)
-            break;
-
-        Serial.println("je joue le temps %d"%i+1);
-        //lire l'etat des switch
-        getSwitchState(i)
-        //activer les solenoids correspondant pendant delayon ms
-        solenoid(HIGH)
-        delay(delayOn)
-        solenoid(LOW)
-
-        for(int j=0;j<readTempo()/10;j++){
-           if digitalRead(startPin)
-               break;
-           delay(readTempo()/10)
-        }
-    }
+void loop ()
+{
+    boolean hasChanged = checkState();
+    switch (status)
+    {
+      case PLAY :
+            if (hasChanged)
+               //reset current beat to 0
+               currentbeat = 0;
+             checkBeat();
+             for (int i,i<number_of_track,i++)             
+                 checkSolenoid(i);            
 }
 
 
@@ -224,7 +216,7 @@ void checkSolenoid(int id)
   {
       if (nextbeat - preTime[id] >= millis())
       {
-           if (checkSwitch(id))
+           if (checkSwitch(id,currentbeat+1))
            {
                 //we have to run this solenoid
                 solstatus[id] = true;
@@ -242,17 +234,9 @@ void checkSolenoid(int id)
       }
   }  
 }
-
-
-
-void checkTempo(){
-}
-
-
-
 //Utils
 void setShiftRegister(int value){
-  //mettre le latch pin  a low pour pouvoir envoyer des valeurs en sÃ©rie au shift register
+    //mettre le latch pin  a low pour pouvoir envoyer des valeurs en sÃ©rie au shift register
     digitalWrite(latchPin, LOW);
     //Activer la colonne correspondant aux temp actuel
     shiftOut(dataPin, clockPin,MSBFIRST,value);
@@ -260,24 +244,31 @@ void setShiftRegister(int value){
     digitalWrite(latchPin, HIGH);
 }
 
-boolean getSwitchState(int pos){
-  return digitalRead(tracks[pos])   
+boolean checkSwitch(int id,int beat)
+{
+  //check the state of switch for next beat
+  setShiftRegister((1<<beat));
+  int state = digitalRead(tracks[id]);
+  if (status == PLAY)
+      setBeatLed();
+  return state;  
+}
+
+void setBeatLed()
+{
+   setShiftRegister((1<<currentbeat));
 }
 
 
-void solenoid(boolean state){
-  for (int i=0;j<number_of_track,i++){
-     if(state[i])
-        digitalWrite(solenoid[j],state);
-  }
-}
-
-int readTempo (){
+int getTempo (){
   //PotentiomÃ¨tre>tempo
-  //chaque chose en son temps
-  int tempo =100;
-  //tempo = analogRead(tempoPin);
-  //tempo = map(tempo, 0, 1023, 0, 255);
-  //delay(10);
+  //return duration in ms of a beat
+  if (status == SETUP)
+      int tempo =100;
+  else
+  {
+     int tempo = analogRead(tempoPin);
+     tempo = map(tempo, 0, 1023, 0, 255);
+  }
   return tempo;
 }
