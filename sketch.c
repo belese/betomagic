@@ -53,7 +53,7 @@ int preTime[] = {0,0,0,0}
 //************************************************//
 
 //nombre de piste
-int number_of_track;
+int number_of_track = sizeof(tracks)/sizeof(int)
 boolean state[number_of_track];
 
 #define PAUSE = 1
@@ -83,8 +83,6 @@ void setup() {
   pinMode(dataPin,OUTPUT);
   pinMode(latchPin,OUTPUT);
   pinMode(clockPin,OUTPUT);
-
-  number_of_track = sizeof(tracks)/sizeof(int)
 
   for (int i;i<number_of_track;i++){
       pinMode(tracks[i],INPUT);
@@ -245,6 +243,7 @@ void checkSolenoid(int id)
       }
   }  
 }
+
 //Utils
 void setShiftRegister(int value){
     //mettre le latch pin  a low pour pouvoir envoyer des valeurs en sÃ©rie au shift register
@@ -255,11 +254,11 @@ void setShiftRegister(int value){
     digitalWrite(latchPin, HIGH);
 }
 
-boolean checkSwitch(int id,int beat)
+boolean checkSwitch(int raw,int col)
 {
   //check the state of switch for next beat
-  setShiftRegister((1<<beat));
-  int state = digitalRead(tracks[id]);
+  setShiftRegister((1<<col));
+  int state = digitalRead(tracks[raw]);
   if (status == PLAY)
       setBeatLed();
   return state;  
