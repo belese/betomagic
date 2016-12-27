@@ -107,7 +107,10 @@ void loop ()
                currentbeat = 0;
              checkBeat();
              for (int i,i<number_of_track,i++)             
-                 checkSolenoid(i);            
+                 checkSolenoid(i); 
+             break;
+      case PAUSE :
+             k2000()
 }
 
 
@@ -158,32 +161,32 @@ int checkState()
               //long Press
               switch (status) 
               {
-   				 case PAUSE:
-      				//pass in setup mode
-                    status = SETUP;
-                    return True;      			
-    			 case PLAY:
-      				//record the state of switch here 
-      				break;
-                 case SETUP:
-                    //save config here and return in pause mode                    
-                    status = PAUSE
-                    break;
+   				    case PAUSE:
+      				    //pass in setup mode
+                  status = SETUP;
+                  return True;      			
+    			    case PLAY:
+      				    //record the state of switch here 
+      				    break;
+               case SETUP:
+                  //save config here and return in pause mode                    
+                  status = PAUSE
+                  break;
   			   }
                
           }
           else
           {
               //short press
-                 case PAUSE:
+              case PAUSE:
       				//pass in play mode
                     status = PLAY
                     return True      				
-    			 case PLAY:
+    			    case PLAY:
       				//pass in pause mode
                     status = PAUSE
                     return True      				
-                 case SETUP:
+              case SETUP:
                     //cancel setup here and return in pause mode                    
                     status = PAUSE
                     break;
@@ -272,3 +275,8 @@ int getTempo (){
   }
   return tempo;
 }
+  
+  void k2000()
+  {
+    //faire clignotter les leds a la k2000 juste pour le fun
+  }
