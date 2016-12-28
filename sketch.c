@@ -286,8 +286,7 @@ boolean checkSwitch(int raw,int col)
 {
   //check the state of switch in raw,col.
   setShiftRegister((1<<col));
-  int state = digitalRead(tracks[raw]);
-  return state;  
+  return digitalRead(tracks[raw]);
 }
 
 boolean checkBeatSwitch(int raw,int col)
