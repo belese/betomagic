@@ -69,8 +69,8 @@ boolean isPressed = false;
 long nextbeat = 0;
 int currentbeat = 0;
 int totalbeat = number_of_beat;
-boolean recordbeat[64][4]
-int currentrecordbeat = 0
+byte recordbeat[7][4];
+
 
 //solenoid info
 boolean solstatus[number_of_track];
@@ -176,7 +176,19 @@ int checkState()
                   status = SETUP;
                   return True;      			
     			    case PLAY:
-      				    //record the state of switch here to add 8 beats
+                  //record the state of switch here to add 8 (number of beat) beats
+                  for (int j=0;j<number_of_track;j++)
+                  {
+                     byte mask;
+                     for (int i=0;i<number_of_beat;i++)                    
+                     {                      
+                        mask = mask << 1
+                        if (checkBeatSwitch(j,i))
+                          mask = mask | B00000001                                                  
+                     }
+                     recordbeat[(totalbeat/number_of_beat)-1)] = mask;
+                  }
+                  totalbeat += number_of_beat;                                              				    
       				    break;
                case SETUP:
                   //save config here and return in pause mode                    
@@ -213,11 +225,12 @@ void checkBeat()
   //check the beat
   if (nextbeat => millis())
   {
-    //we are on next bit
+    //we are on next bit    
     nextbeat = millis() + getTempo();
     currentbeat++;
     if (currentbeat == totalbeat)
       currentbeat = 0;
+    setBeatLed()
   }
 }
 
@@ -274,18 +287,35 @@ boolean checkSwitch(int raw,int col)
   //check the state of switch in raw,col.
   setShiftRegister((1<<col));
   int state = digitalRead(tracks[raw]);
-  if (status == PLAY)
-      setBeatLed();
   return state;  
+}
+
+boolean checkBeatSwitch(int raw,int col)
+{
+  boolean rc = checkSwitch(raw,col);
+  setBeatLed();
+  return rc
+}
+
+boolean isBeatEnable(int beat,int raw)
+{
+  if beat > (totalbeat - number_of_beat)
+  {
+      return checkBeatSwitch(raw,beat)
+  }
+  else
+  {
+      //todo : check the recorded beat 
+  }
 }
 
 void setBeatLed()
 {
-    byte ledmask = 1<<(currentbeat%8)
-    if totalbeat > 8
+    byte ledmask = 1<<(currentbeat%number_of_beat)
+    if totalbeat > number_of_beat
     {
-       //si plus que 8 temps, on affiche la led correspondante a la mesure en plus
-       byte mesuremask = 1<<(currentbeat/8)
+       //si plus que 8 temps, on affiche la led correspondante à la mesure en plus
+       byte mesuremask = 1<<(currentbeat/number_of_beat)
        ledmask =  lesmask | mesuremask
     }
     setShiftRegister(ledmask);
