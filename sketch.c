@@ -115,7 +115,7 @@ void loop ()
              k2000();
              break;
       case SETUP :
-             setup();
+             config();
              break;
       case USB :
              usb();
@@ -281,7 +281,14 @@ boolean checkSwitch(int raw,int col)
 
 void setBeatLed()
 {
-   setShiftRegister((1<<currentbeat));
+    byte ledmask = 1<<(currentbeat%8)
+    if totalbeat > 8
+    {
+       //si plus que 8 temps, on affiche la led correspondante a la mesure en plus
+       byte mesuremask = 1<<(currentbeat/8)
+       ledmask =  lesmask | mesuremask
+    }
+    setShiftRegister(ledmask);
 }
 
 
