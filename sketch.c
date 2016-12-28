@@ -171,7 +171,7 @@ int checkState()
               //long Press
               switch (status) 
               {
-   				    case PAUSE:
+              case PAUSE:
       				    //pass in setup mode
                   status = SETUP;
                   return True;      			
