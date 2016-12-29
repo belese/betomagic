@@ -64,7 +64,7 @@ int status = PAUSE;
 
 //buuton on/off info
 boolean isPressed = false;
-  
+
 //beat info
 long nextbeat = 0;
 int currentbeat = 0;
@@ -76,8 +76,8 @@ byte recordbeat[7][4];
 boolean solstatus[number_of_track];
 
 
-void setup() 
-{  
+void setup()
+{
   pinMode(dataPin,OUTPUT);
   pinMode(latchPin,OUTPUT);
   pinMode(clockPin,OUTPUT);
@@ -107,9 +107,12 @@ void loop ()
                currentbeat = 0;
                nextbeat = millis() + getTempo();
             }
-            checkBeat();
-            for (int i,i<number_of_track,i++)             
-                 checkSolenoid(i); 
+            if (checkBeat())
+                setBeatLed();
+
+            for (int i,i<number_of_track,i++)
+                 if (checkSolenoid(i))
+                     setBeatLed();
              break;
       case PAUSE :
              k2000();
@@ -137,7 +140,7 @@ int checkState()
      {
        status = USB;
        return true;
-     }       
+     }
    }
    else
    {
@@ -148,14 +151,14 @@ int checkState()
        return true
      }
    }
-   
+
    if (digitalRead(startPin))
    {
       //button is pressed
       if (not isPressed)
-      {       
+      {
           isPressed = True;
-          pressTime = millis();        
+          pressTime = millis();
       }
    }
    else
@@ -166,88 +169,64 @@ int checkState()
           //button was pressed and is released
           //check wich status will be next
           isPressed = false;
-          if ((pressTime + time_before_next_function) > millis)
+          if ((pressTime + time_before_next_function) > millis())
           {
               //long Press
-              switch (status) 
+              switch (status)
               {
               case PAUSE:
-      				    //pass in setup mode
+                  //pass in setup mode
                   status = SETUP;
-                  return True;      			
-    			    case PLAY:
+                  return True;
+              case PLAY:
                   //record the state of switch here to add 8 (number of beat) beats
-                  for (int j=0;j<number_of_track;j++)
-                  {
-                     byte mask;
-                     for (int i=0;i<number_of_beat;i++)                    
-                     {                      
-                        mask = mask << 1
-                        if (checkBeatSwitch(j,i))
-                          mask = mask | B00000001                                                  
-                     }
-                     recordbeat[(totalbeat/number_of_beat)-1)] = mask;
-                  }
-                  totalbeat += number_of_beat;                                              				    
-      				    break;
-               case SETUP:
-                  //save config here and return in pause mode                    
-                  status = PAUSE
+                  recordBeats();
+                  setBeatLed();
                   break;
-  			   }
-               
+               case SETUP:
+                  //save config here and return in pause mode
+                  status = PAUSE,
+                  break;
+               }
+
           }
           else
           {
               //short press
               case PAUSE:
-      				//pass in play mode
+                    //pass in play mode
                     status = PLAY
-                    return True      				
-    			    case PLAY:
-      				//pass in pause mode
+                    return True
+                    case PLAY:
+                    //pass in pause mode
                     status = PAUSE
-                    return True      				
+                    return True
               case SETUP:
-                    //cancel setup here and return in pause mode                    
+                    //cancel setup here and return in pause mode
                     status = PAUSE
                     break;
-                     
+
           }
-          
-      }          
+
+      }
    }
-   return false      
+   return false
 }
 
-void checkBeat()
-{
-  //check the beat
-  if (nextbeat => millis())
-  {
-    //we are on next bit    
-    nextbeat = millis() + getTempo();
-    currentbeat++;
-    if (currentbeat == totalbeat)
-      currentbeat = 0;
-    setBeatLed()
-  }
-}
-
-
-void checkSolenoid(int id)
+boolean checkSolenoid(int id)
 {
   //verifie si le solenoid doit etre activé ou stopper
   if (solstatus[id] == false)
   {
       if (nextbeat - preTime[id] >= millis())
-      {                      
-           if (checkSwitch(id,currentbeat+1))
+      {
+           if (isBeatEnable(id,currentbeat+1))
            {
                 //we have to run this solenoid
                 solstatus[id] = true;
                 digitalWrite(solenoid[id],HIGH);
            }
+           return true;
       }
   }
   else
@@ -256,12 +235,29 @@ void checkSolenoid(int id)
       {
            //we have to stop this solenoid
            solstatus[id] = false;
-           digitalWrite(solenoid[id],LOW);           
+           digitalWrite(solenoid[id],LOW);
       }
-  }  
+  }
+  return false;
 }
 
-void setup()
+
+boolean checkBeat()
+{
+  //check the beat
+  if (nextbeat => millis())
+  {
+    //we are on next bit
+    nextbeat = millis() + getTempo();
+    currentbeat++;
+    if (currentbeat == totalbeat)
+      currentbeat = 0;
+    return true;
+  }
+  return false;
+}
+
+void config()
 {
   //TODO
 }
@@ -272,6 +268,25 @@ void usb()
 }
 
 //Utils
+void recordBeats()
+{
+    for (int j=0;j<number_of_track;j++)
+    {
+        byte mask;
+        for (int i=0;i<number_of_beat;i++)
+        {
+            mask = mask << 1
+            if (checkSwitch(j,i))
+                mask = mask | B00000001;
+        }
+        recordbeat[(totalbeat/number_of_beat)-1)] = mask;
+    }
+    totalbeat += number_of_beat;
+}
+
+
+
+
 void setShiftRegister(int value)
 {
     //mettre le latch pin  a low pour pouvoir envoyer des valeurs en sÃ©rie au shift register
@@ -289,22 +304,16 @@ boolean checkSwitch(int raw,int col)
   return digitalRead(tracks[raw]);
 }
 
-boolean checkBeatSwitch(int raw,int col)
-{
-  boolean rc = checkSwitch(raw,col);
-  setBeatLed();
-  return rc
-}
 
 boolean isBeatEnable(int beat,int raw)
 {
   if beat > (totalbeat - number_of_beat)
   {
-      return checkBeatSwitch(raw,beat)
+      return checkSwitch(raw,beat);
   }
   else
   {
-      //todo : check the recorded beat 
+      return (recordbeat[beat/8][raw] | (1<<(beat%8)); //not sure, do test
   }
 }
 
@@ -334,7 +343,7 @@ int getTempo ()
   }
   return tempo;
 }
-  
+
  void k2000()
  {
     //faire clignotter les leds a la k2000 juste pour le fun
